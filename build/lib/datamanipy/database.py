@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import pandas
 import datetime as dt
-from database_info import DbConnInfoStore
+from datamanipy.database_info import DbConnInfoStore
 
 
 class Database():
