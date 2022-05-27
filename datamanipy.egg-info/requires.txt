@@ -1,0 +1,8 @@
+sqlalchemy
+pandas
+datetime
+getpass
+keyring
+json
+pathlib
+os
