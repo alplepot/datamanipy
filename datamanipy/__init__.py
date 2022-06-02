@@ -1,7 +1,8 @@
 
 from . import (
     database_info,
-    database
+    database,
+    sas
 )
 
 from .database import (
@@ -10,4 +11,9 @@ from .database import (
 
 from .database_info import (
     DbConnInfoStore
+)
+
+from .file import (
+    File,
+    Sas
 )

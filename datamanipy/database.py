@@ -29,7 +29,7 @@ class Database():
         Database name
     user : str, optional
         Database username
-    uri : str, optional
+    uri : str
         Database URI
     application_name : str, default 'MyPythonApp'
         Name of your application. It will allows you to retrieve your connection in the database
@@ -183,10 +183,6 @@ class Database():
             - append: insert new values to the existing table
         index : bool, default True
             Write DataFrame index as a column. Uses index_label as the column name in the table.
-
-
-
-
 
         Returns
         -------

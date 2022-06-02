@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datamanipy",
-    version="1.0.2",
+    version="1.1.0",
     author="Alexandre Le Potier",
     description="A Python package that provides tools to help you manipulating data.",
     classifiers=[
@@ -16,7 +16,8 @@ setup(
         'sqlalchemy>=1.4.28',
         'pandas>=1.3.5',
         'datetime>=4.3',
-        'keyring>=23.5.0'],
+        'keyring>=23.5.0',
+        'pyreadstat>=1.1.4'],
     long_description="""
         # datamanipy
 
