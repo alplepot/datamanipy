@@ -19,6 +19,7 @@ pip install datamanipy
 - [pandas](https://pandas.pydata.org/)
 - [datetime](https://docs.python.org/3/library/datetime.html)
 - [keyring](https://keyring.readthedocs.io)
+- [pyreadstat](https://pyreadstat.readthedocs.io)
 
 ## Contributing to art
 
