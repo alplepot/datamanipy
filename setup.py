@@ -17,7 +17,8 @@ setup(
         'pandas>=1.3.5',
         'datetime>=4.3',
         'keyring>=23.5.0',
-        'pyreadstat>=1.1.4'],
+        'pyreadstat>=1.1.4',
+        'openpyxl>=3.0.10'],
     long_description="""
         # datamanipy
 
