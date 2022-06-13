@@ -2,7 +2,7 @@
 from . import (
     database_info,
     database,
-    sas
+    file
 )
 
 from .database import (
@@ -15,5 +15,7 @@ from .database_info import (
 
 from .file import (
     File,
-    Sas
+    Csv,
+    Sas,
+    Excel
 )
