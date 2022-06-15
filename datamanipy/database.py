@@ -29,7 +29,7 @@ class Database():
         Database name
     user : str, optional
         Database username
-    uri : str, optional
+    uri : str
         Database URI
     application_name : str, default 'MyPythonApp'
         Name of your application. It will allows you to retrieve your connection in the database
@@ -132,14 +132,14 @@ class Database():
         engine = self.engine()
         return engine.begin()
 
-    def import_data(self, sql):
-        """Import data from database
-        
+    def to_df(self, sql):
+        """Import data from database into a pandas.DataFrame
+
         Parameters
         ----------
         sql : str
             SQL query
-        
+
         Returns
         -------
         pandas.DataFrame
@@ -148,9 +148,9 @@ class Database():
             data = pandas.read_sql(sql=sql, con=con)
         return data
 
-    def import_meta(self, table_name, table_schema='public'):
-        """Import table metadata from database
-        
+    def get_metadata(self, table_name, table_schema='public'):
+        """Import table metadata into a pandas.DataFrame
+
         Parameters
         ----------
         table_schema : str, default 'public'
@@ -167,9 +167,9 @@ class Database():
             data = pandas.read_sql(sql=sql, con=con)
         return data
 
-    def insert_data(self, df, table_name, table_schema='public', if_exists='fail', index=False):
-        """Insert a dataframe into the database
-        
+    def insert_df(self, df, table_name, table_schema='public', if_exists='fail', index=False):
+        """Insert a pandas.DataFrame into the database
+
         Parameters
         ----------
         table_name : str
@@ -184,13 +184,9 @@ class Database():
         index : bool, default True
             Write DataFrame index as a column. Uses index_label as the column name in the table.
 
-
-
-
-
         Returns
         -------
-        pandas.DataFrame
+        None
         """
         with self.connect() as con:
             df.to_sql(name=table_name, schema=table_schema,
@@ -198,7 +194,7 @@ class Database():
 
     def execute(self, sql):
         """Execute a SQL query
-        
+
         Parameters
         ----------
         sql : str
@@ -218,7 +214,7 @@ class Database():
 
     def execute_file(self, sql_file):
         """Execute a SQL query stored in a file
-        
+
         Parameters
         ----------
         sql : str
@@ -232,38 +228,3 @@ class Database():
             sql_query = sql_wrapper.read()
             result = self.execute(sql_query)
         return result
-
-
-if __name__ == "__main__":
-
-    # db = Database(scheme='postgresql', host='arf-rdb1-7500-0.tech.araf.local.com',
-    #               port='5444', name='deom', user='a-le-potier')
-    db = Database(db_key='deom')
-
-    # print('Testing import_data:')
-    # assert db.import_data(
-    #     'SELECT 1 AS first_column').iloc[0]['first_column'] == 1, "import_data_from_pgsql('SELECT 1 AS first_column') should be equal to 1"
-
-    # print('Testing import_meta:')
-    # assert [col for col in db.import_meta('informatin_schema', 'columns').columns] == [
-    #     'column_name', 'data_type', 'is_nullable', 'col_description'], "import_meta_from_pgsql('informatin_schema', 'columns') sould have 4 columns"
-
-    # print('Testing insert_data:')
-    # data = {'name': ['Tom', 'dick', 'harry'],
-    #         'age': [22, 21, 24]}
-    # df = pandas.DataFrame(data)
-    # db.insert_data(df, 'z_alex', 'test_insert_package_art',
-    #                if_exists='replace')
-    # assert df.shape[0] == db.import_data(
-    #     'SELECT * FROM z_alex.test_insert_package_art').shape[0], "insert_data(df, 'z_alex', 'test_insert_package_art', if_exists='replace') should be a dataframe"
-
-    # print('Testing execute:')
-    # result = db.execute("""
-    #     SET ROLE deom; 
-    #     DROP TABLE IF EXISTS table_creation_test; 
-    #     CREATE TABLE table_creation_test (
-    #           first_name text 
-    #         , last_name text
-    #         , age float8
-    #     );
-    #     """)
