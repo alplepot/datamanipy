@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import pandas
-import datetime as dt
 from datamanipy.database_info import DbConnInfoStore
 
 
@@ -56,7 +55,7 @@ class Database():
             self.user = db['user']
             self.uri = db['uri']
         self.engine = self.create_engine()
-        
+
     def _split_schema_from_table_name(self, table):
         """Split schema and table names"""
         name = table.split('.')[-1]
@@ -97,7 +96,7 @@ class Database():
             if save_pwd == 'y':
                 keyring.set_password(
                     service_name=self.uri, username=self.user, password=password)  # save password in credential manager
-    
+
     def reset_password(self):
         """Reset password"""
         password = self._ask_password()
@@ -135,9 +134,9 @@ class Database():
         return sessionmaker(bind=self.engine, autocommit=True)
 
     def connect(self):
-        """Return a connection to database"""
+        """Connect to database"""
         return self.engine.begin()
-    
+
     def table(self, table):
         """Create an object representing a table in the database
         
@@ -152,7 +151,7 @@ class Database():
         """
         schema, name = self._split_schema_from_table_name(table)
         return Table(name, MetaData(), schema=schema, autoload=True, autoload_with=self.engine)
-    
+
     def comment_table(self, table, comment):
         """Comment a table
         
@@ -167,9 +166,9 @@ class Database():
         -------
         None
         """
-        comment = comment.replace("\'","\'\'")
+        comment = comment.replace("\'", "\'\'")
         self.execute(f"""COMMENT ON TABLE {table} IS '{comment}';""")
-    
+
     def comment_column(self, table, column, comment):
         """Comment a column
         
@@ -186,7 +185,7 @@ class Database():
         -------
         None
         """
-        comment = comment.replace("\'","\'\'")
+        comment = comment.replace("\'", "\'\'")
         self.execute(f"""COMMENT ON COLUMN {table}.{column} IS '{comment}';""")
 
     def to_df(self, sql):
@@ -210,7 +209,7 @@ class Database():
         Parameters
         ----------
         table : str
-            Name of the table
+            Name of the table, preceeded by its schema (schema.table)
 
         Returns
         -------
@@ -228,7 +227,7 @@ class Database():
         Parameters
         ----------
         table : str
-            Name of the table
+            Name of the table, preceeded by its schema (schema.table)
         if_exists : {'fail', 'replace', 'append'}, default 'append'
             How to behave if the table already exists.
             - fail: raise a ValueError
@@ -249,9 +248,9 @@ class Database():
         """
         schema, name = self._split_schema_from_table_name(table)
         with self.connect() as con:
-            df.to_sql(name=name, schema=schema, con=con, if_exists=if_exists, index=index, 
+            df.to_sql(name=name, schema=schema, con=con, if_exists=if_exists, index=index,
                       index_label=index_label, chunksize=chunksize, dtype=dtype)
-            
+
     def execute(self, sql):
         """Execute a SQL query
 
@@ -264,7 +263,7 @@ class Database():
         -------
         sqlalchemy.engine.cursor.LegacyCursorResult
         """
-        if type(sql)==str:
+        if type(sql) == str:
             sql = text(sql)
         with self.connect() as con:
             results = con.execute(sql)

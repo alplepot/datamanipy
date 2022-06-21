@@ -15,7 +15,6 @@ setup(
     install_requires=[
         'sqlalchemy>=1.4.28',
         'pandas>=1.3.5',
-        'datetime>=4.3',
         'keyring>=23.5.0',
         'pyreadstat>=1.1.4',
         'openpyxl>=3.0.10'],
@@ -40,7 +39,6 @@ pip install datamanipy
 
 - [sqlalchemy](https://docs.sqlalchemy.org/en/14/)
 - [pandas](https://pandas.pydata.org/)
-- [datetime](https://docs.python.org/3/library/datetime.html)
 - [keyring](https://keyring.readthedocs.io)
 - [pyreadstat](https://pyreadstat.readthedocs.io)
 - [openpyxl](https://openpyxl.readthedocs.io)
