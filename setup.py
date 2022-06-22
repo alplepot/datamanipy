@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datamanipy",
-    version="1.2.1",
+    version="1.2.2",
     author="Alexandre Le Potier",
     description="A Python package that provides tools to help you manipulating data.",
     classifiers=[
