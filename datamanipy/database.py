@@ -120,15 +120,17 @@ class Database():
             self.uri.replace("********", password),
             executemany_mode='values_only',
             connect_args={"application_name": self.application_name})
-        try:
-            with engine.connect() as con:
-                self._save_password(password)
-        except:
-            raise
+        with engine.connect() as con:
+            self._save_password(password)
+        print('Engine operational. Close it with the close_engine() method.')
         return engine
+    
+    def close_engine(self):
+        """Close the engine"""
+        self.engine.dispose()
 
     def session(self):
-        """Create a database session.
+        """Create a database session
         Why use a session ? https://stackoverflow.com/questions/34322471/sqlalchemy-engine-connection-and-session-difference
         """
         return sessionmaker(bind=self.engine, autocommit=True)
@@ -136,6 +138,20 @@ class Database():
     def connect(self):
         """Connect to database"""
         return self.engine.begin()
+
+    def set_role(self, role):
+        """Enable roles for the current session
+        
+        Parameters
+        ----------
+        role : str
+            Name of the role to use for the current session
+
+        Returns
+        -------
+        None
+        """
+        self.execute(f"""SET ROLE {role};""")
 
     def table(self, table):
         """Create an object representing a table in the database
