@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="datamanipy",
-    version="1.2.2",
+    version="1.2.3",
     author="Alexandre Le Potier",
     description="A Python package that provides tools to help you manipulating data.",
     classifiers=[
@@ -17,7 +17,8 @@ setup(
         'pandas>=1.3.5',
         'keyring>=23.5.0',
         'pyreadstat>=1.1.4',
-        'openpyxl>=3.0.10'],
+        'openpyxl>=3.0.10',
+        'datetime>=4.3'],
     long_description="""
 # datamanipy
 
@@ -42,6 +43,7 @@ pip install datamanipy
 - [keyring](https://keyring.readthedocs.io)
 - [pyreadstat](https://pyreadstat.readthedocs.io)
 - [openpyxl](https://openpyxl.readthedocs.io)
+- [datetime](https://docs.python.org/3/library/datetime.html)
 
 ## Contributing to art
 

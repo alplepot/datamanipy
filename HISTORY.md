@@ -1,11 +1,5 @@
 # History
 
-## 1.3.0
-### Added
-### Fixed
-- Database : A class used to represent a database.
-### Deprecated
-
 ## 1.2.0
 ### Added
 - File : A class used to represent a file

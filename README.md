@@ -21,6 +21,7 @@ pip install datamanipy
 - [keyring](https://keyring.readthedocs.io)
 - [pyreadstat](https://pyreadstat.readthedocs.io)
 - [openpyxl](https://openpyxl.readthedocs.io)
+- [datetime](https://docs.python.org/3/library/datetime.html)
 
 ## Contributing to art
 

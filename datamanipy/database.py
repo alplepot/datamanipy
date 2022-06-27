@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import pandas
 from datamanipy.database_info import DbConnInfoStore
+import datetime as dt
 
 
 class Database():
@@ -285,19 +286,30 @@ class Database():
             results = con.execute(sql)
         return results
 
-    def execute_file(self, sql_file):
+    def execute_file(self, sql_file, param=None):
         """Execute a SQL query stored in a file
 
         Parameters
         ----------
         sql : str
             SQL file
+        param : str
+            A parameter to pass to the SQL file. The first curly brackets {} in the SQL file will be replaced by this parameter.
 
         Returns
         -------
         sqlalchemy.engine.cursor.LegacyCursorResult
         """
         with open(sql_file, 'r') as sql_wrapper:
-            sql_query = sql_wrapper.read()
-            results = self.execute(sql_query)
+            if param:
+                print(f"Running {sql_file} with the following parameters: {param}")
+                sql_query = sql_wrapper.read().format(param)
+            else:
+                print(f"Running {sql_file} without parameters")
+                sql_query = sql_wrapper.read()
+
+        start_time = dt.datetime.now()
+        print(f"\t\t>> Start time: {start_time}")
+        results = self.execute(sql_query)
+        print(f"\t\t>> Done in {dt.datetime.now() - start_time}")
         return results
