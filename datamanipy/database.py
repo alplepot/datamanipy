@@ -286,21 +286,23 @@ class Database():
             results = con.execute(sql)
         return results
 
-    def execute_file(self, sql_file, param=None):
+    def execute_file(self, sql_file, encoding=None, param=None):
         """Execute a SQL query stored in a file
 
         Parameters
         ----------
         sql : str
             SQL file
+        encoding : str
+            Encoding used to decode the SQL file
         param : str
-            A parameter to pass to the SQL file. The first curly brackets {} in the SQL file will be replaced by this parameter.
+            A parameter to pass to the SQL file : the first curly brackets {} in the SQL file will be replaced by this parameter
 
         Returns
         -------
         sqlalchemy.engine.cursor.LegacyCursorResult
         """
-        with open(sql_file, 'r') as sql_wrapper:
+        with open(sql_file, 'r', encoding=encoding) as sql_wrapper:
             if param:
                 print(f"Running {sql_file} with the following parameters: {param}")
                 sql_query = sql_wrapper.read().format(param)
