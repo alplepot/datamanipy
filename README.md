@@ -18,10 +18,10 @@ pip install datamanipy
 
 - [sqlalchemy](https://docs.sqlalchemy.org/en/14/)
 - [pandas](https://pandas.pydata.org/)
-- [datetime](https://docs.python.org/3/library/datetime.html)
 - [keyring](https://keyring.readthedocs.io)
 - [pyreadstat](https://pyreadstat.readthedocs.io)
 - [openpyxl](https://openpyxl.readthedocs.io)
+- [datetime](https://docs.python.org/3/library/datetime.html)
 
 ## Contributing to art
 

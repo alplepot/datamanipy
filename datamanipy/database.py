@@ -2,12 +2,12 @@
 
 import getpass
 import keyring
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 import pandas
-import datetime as dt
 from datamanipy.database_info import DbConnInfoStore
+import datetime as dt
 
 
 class Database():
@@ -55,18 +55,16 @@ class Database():
             self.name = db['name']
             self.user = db['user']
             self.uri = db['uri']
-        with self.connect() as con:
-            pass
+        self.engine = self.create_engine()
 
-    def show_info(self):
-        """Show database connection information"""
-        print(f'db_key: {self.db_key}')
-        print(f'scheme: {self.scheme}')
-        print(f'host: {self.host}')
-        print(f'port: {self.port}')
-        print(f'name: {self.name}')
-        print(f'user: {self.user}')
-        print(f'uri: {self.uri}')
+    def _split_schema_from_table_name(self, table):
+        """Split schema and table names"""
+        name = table.split('.')[-1]
+        try:
+            schema = table.split('.')[-2]
+        except:
+            schema = None
+        return schema, name
 
     def _get_password(self):
         """Get user password in credential manager"""
@@ -106,31 +104,106 @@ class Database():
         keyring.set_password(
             service_name=self.uri, username=self.user, password=password)  # save password in credential manager
 
-    def engine(self):
-        """Create engine"""
+    def show_info(self):
+        """Show database connection information"""
+        print(f'db_key: {self.db_key}')
+        print(f'scheme: {self.scheme}')
+        print(f'host: {self.host}')
+        print(f'port: {self.port}')
+        print(f'name: {self.name}')
+        print(f'user: {self.user}')
+        print(f'uri: {self.uri}')
+
+    def create_engine(self):
+        """Create an engine"""
         password = self._password()
         engine = create_engine(
             self.uri.replace("********", password),
             executemany_mode='values_only',
             connect_args={"application_name": self.application_name})
-        try:
-            with engine.connect() as con:
-                self._save_password(password)
-        except:
-            raise
+        with engine.connect() as con:
+            self._save_password(password)
+        print('Engine operational. Close it with the close_engine() method.')
         return engine
+    
+    def close_engine(self):
+        """Close the engine"""
+        self.engine.dispose()
 
     def session(self):
-        """Create a database session.
+        """Create a database session
         Why use a session ? https://stackoverflow.com/questions/34322471/sqlalchemy-engine-connection-and-session-difference
         """
-        engine = self.engine()
-        return sessionmaker(bind=engine, autocommit=True)
+        return sessionmaker(bind=self.engine, autocommit=True)
 
     def connect(self):
         """Connect to database"""
-        engine = self.engine()
-        return engine.begin()
+        return self.engine.begin()
+
+    def set_role(self, role):
+        """Enable roles for the current session
+        
+        Parameters
+        ----------
+        role : str
+            Name of the role to use for the current session
+
+        Returns
+        -------
+        None
+        """
+        self.execute(f"""SET ROLE {role};""")
+
+    def table(self, table):
+        """Create an object representing a table in the database
+        
+        Parameters
+        ----------
+        table : str
+            Name of the table, preceeding by its schema (schema.table)
+        
+        Returns
+        -------
+        sqlalchemy.schema.Table
+        """
+        schema, name = self._split_schema_from_table_name(table)
+        return Table(name, MetaData(), schema=schema, autoload=True, autoload_with=self.engine)
+
+    def comment_table(self, table, comment):
+        """Comment a table
+        
+        Parameters
+        ----------
+        table : str
+            Name of the table, preceeded by its schema (schema.table)
+        comment : str
+            Comment for the table
+
+        Returns
+        -------
+        None
+        """
+        comment = comment.replace("\'", "\'\'")
+        self.execute(f"""COMMENT ON TABLE {table} IS '{comment}';""")
+
+    def comment_column(self, table, column, comment):
+        """Comment a column
+        
+        Parameters
+        ----------
+        table : str
+            Name of the table, preceeded by its schema (schema.table)
+        column : str
+            Name of the column
+        comment : str
+            Comment for the table
+
+        Returns
+        -------
+        None
+        """
+        comment = comment.replace("\'", "\'\'")
+        self.execute(f"""COMMENT ON COLUMN {table}.{column} IS '{comment}';""")
 
     def to_df(self, sql):
         """Import data from database into a pandas.DataFrame
@@ -145,37 +218,33 @@ class Database():
         pandas.DataFrame
         """
         with self.connect() as con:
-            data = pandas.read_sql(sql=sql, con=con)
-        return data
+            return pandas.read_sql(sql=sql, con=con)
 
-    def get_metadata(self, table_name, table_schema='public'):
+    def get_postgre_table_metadata(self, table):
         """Import table metadata into a pandas.DataFrame
 
         Parameters
         ----------
-        table_schema : str, default 'public'
-            Database schema that contains the table
-        table_name : str
-            Name of the table
+        table : str
+            Name of the table, preceeded by its schema (schema.table)
 
         Returns
         -------
         pandas.DataFrame
         """
-        sql = f"SELECT column_name, data_type, is_nullable, pg_catalog.col_description(format('{table_schema}.{table_name}',isc.table_schema,isc.table_name)::regclass::oid,isc.ordinal_position) FROM information_schema.columns isc WHERE table_schema = '{table_schema}' AND table_name = '{table_name}'"
-        with self.connect() as con:
-            data = pandas.read_sql(sql=sql, con=con)
-        return data
+        schema, name = self._split_schema_from_table_name(table)
+        if schema is None:
+            schema = 'public'
+        sql = f"SELECT column_name, data_type, is_nullable, pg_catalog.col_description(format('{schema}.{name}',isc.table_schema,isc.table_name)::regclass::oid,isc.ordinal_position) FROM information_schema.columns isc WHERE table_schema = '{schema}' AND table_name = '{name}'"
+        return self.to_df(sql)
 
-    def insert_df(self, df, table_name, table_schema='public', if_exists='fail', index=False):
+    def insert_df(self, df, table, if_exists='fail', index=False, index_label=None, chunksize=None, dtype=None):
         """Insert a pandas.DataFrame into the database
 
         Parameters
         ----------
-        table_name : str
-            Name of the table
-        table_schema : str,  default 'public'
-            Database schema that contains the table
+        table : str
+            Name of the table, preceeded by its schema (schema.table)
         if_exists : {'fail', 'replace', 'append'}, default 'append'
             How to behave if the table already exists.
             - fail: raise a ValueError
@@ -183,48 +252,66 @@ class Database():
             - append: insert new values to the existing table
         index : bool, default True
             Write DataFrame index as a column. Uses index_label as the column name in the table.
+        index_label : str or sequence, default None
+            Column label for index column(s). If None is given (default) and index is True, then the index names are used. A sequence should be given if the DataFrame uses MultiIndex.
+        chunksize : int, optional
+            Specify the number of rows in each batch to be written at a time. By default, all rows will be written at once.
+        dtype : dict or scalar, optional
+            Specifying the datatype for columns. If a dictionary is used, the keys should be the column names and the values should be the SQLAlchemy types or strings for the sqlite3 legacy mode. If a scalar is provided, it will be applied to all columns.
 
         Returns
         -------
         None
         """
+        schema, name = self._split_schema_from_table_name(table)
         with self.connect() as con:
-            df.to_sql(name=table_name, schema=table_schema,
-                      con=con, if_exists=if_exists, index=False)
+            df.to_sql(name=name, schema=schema, con=con, if_exists=if_exists, index=index,
+                      index_label=index_label, chunksize=chunksize, dtype=dtype)
 
     def execute(self, sql):
         """Execute a SQL query
 
         Parameters
         ----------
-        sql : str
+        sql : str or sqlalchemy.sql.expression.Select
             SQL query
 
         Returns
         -------
         sqlalchemy.engine.cursor.LegacyCursorResult
         """
+        if type(sql) == str:
+            sql = text(sql)
         with self.connect() as con:
-            start_time = dt.datetime.now()
-            print("Executing SQL query...")
-            print(f"\t\t>> Start time: {start_time}")
-            result = con.execute(text(sql))
-            print(f"\t\t>> Done in {dt.datetime.now() - start_time}")
-        return result
+            results = con.execute(sql)
+        return results
 
-    def execute_file(self, sql_file):
+    def execute_file(self, sql_file, encoding=None, param=None):
         """Execute a SQL query stored in a file
 
         Parameters
         ----------
         sql : str
             SQL file
+        encoding : str
+            Encoding used to decode the SQL file
+        param : str
+            A parameter to pass to the SQL file : the first curly brackets {} in the SQL file will be replaced by this parameter
 
         Returns
         -------
         sqlalchemy.engine.cursor.LegacyCursorResult
         """
-        with open(sql_file, 'r') as sql_wrapper:
-            sql_query = sql_wrapper.read()
-            result = self.execute(sql_query)
-        return result
+        with open(sql_file, 'r', encoding=encoding) as sql_wrapper:
+            if param:
+                print(f"Running {sql_file} with the following parameters: {param}")
+                sql_query = sql_wrapper.read().format(param)
+            else:
+                print(f"Running {sql_file} without parameters")
+                sql_query = sql_wrapper.read()
+
+        start_time = dt.datetime.now()
+        print(f"\t\t>> Start time: {start_time}")
+        results = self.execute(sql_query)
+        print(f"\t\t>> Done in {dt.datetime.now() - start_time}")
+        return results

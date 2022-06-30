@@ -89,6 +89,7 @@ class Csv(File):
               sep=';',
               delimiter=None,
               header='infer',
+              names=None,
               index_col=None,
               usecols=None,
               squeeze=None,
@@ -137,7 +138,7 @@ class Csv(File):
         See https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html for the full documentation.
         """
 
-        return pandas.read_csv(self.path, sep=sep, delimiter=delimiter, header=header,
+        return pandas.read_csv(self.path, sep=sep, delimiter=delimiter, header=header, names=names,
                                index_col=index_col, usecols=usecols, squeeze=squeeze,
                                mangle_dupe_cols=mangle_dupe_cols, dtype=dtype, engine=None, converters=converters,
                                true_values=true_values, false_values=false_values,
