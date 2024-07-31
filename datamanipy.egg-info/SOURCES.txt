@@ -1,0 +1,14 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+datamanipy/__init__.py
+datamanipy/database.py
+datamanipy/database_info.py
+datamanipy/file.py
+datamanipy.egg-info/PKG-INFO
+datamanipy.egg-info/SOURCES.txt
+datamanipy.egg-info/dependency_links.txt
+datamanipy.egg-info/requires.txt
+datamanipy.egg-info/top_level.txt
