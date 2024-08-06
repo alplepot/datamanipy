@@ -92,7 +92,6 @@ class Csv(File):
               names=None,
               index_col=None,
               usecols=None,
-              squeeze=None,
               mangle_dupe_cols=True,
               dtype=None, engine=None,
               converters=None,
@@ -139,7 +138,7 @@ class Csv(File):
         """
 
         return pandas.read_csv(self.path, sep=sep, delimiter=delimiter, header=header, names=names,
-                               index_col=index_col, usecols=usecols, squeeze=squeeze,
+                               index_col=index_col, usecols=usecols, 
                                mangle_dupe_cols=mangle_dupe_cols, dtype=dtype, engine=None, converters=converters,
                                true_values=true_values, false_values=false_values,
                                skipinitialspace=skipinitialspace, skiprows=skiprows, skipfooter=skipfooter,
@@ -274,7 +273,6 @@ class Excel(File):
               names=None,
               index_col=None,
               usecols=None,
-              squeeze=None,
               dtype=None, 
               engine=None, 
               converters=None, 
@@ -299,7 +297,7 @@ class Excel(File):
         """
     
         return pandas.read_excel(self.path, sheet_name=sheet_name, header=header, names=names, index_col=index_col, usecols=usecols, 
-                                  squeeze=squeeze, dtype=dtype, engine=engine, converters=converters, true_values=true_values, 
+                                  dtype=dtype, engine=engine, converters=converters, true_values=true_values, 
                                   false_values=false_values, skiprows=skiprows, nrows=nrows, na_values=na_values, keep_default_na=keep_default_na, 
                                   na_filter=na_filter, verbose=verbose, parse_dates=parse_dates, date_parser=date_parser, 
                                   thousands=thousands, comment=comment, skipfooter=skipfooter, convert_float=convert_float, 
