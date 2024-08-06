@@ -167,7 +167,7 @@ class Database():
         sqlalchemy.schema.Table
         """
         schema, name = self._split_schema_from_table_name(table)
-        return Table(name, MetaData(), schema=schema, autoload=True, autoload_with=self.engine)
+        return Table(name, MetaData(), schema=schema, autoload_with=self.engine)
 
     def comment_table(self, table, comment):
         """Comment a table
